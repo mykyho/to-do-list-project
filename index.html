@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aesthetic To-Do List</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="main-layout">
+            <div class="main-column">
+                <header class="modern-header">
+                    <div class="header-content">
+                        <h1><i class="fas fa-seedling"></i> Myky's To-Do List</h1>
+                        <p class="subtitle">What now? >.<</p>
+                    </div>
+                </header>
+
+                <div class="add-task-section">
+                    <div class="task-input-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-plus input-icon"></i>
+                            <input type="text" id="taskInput" placeholder="Add Task">
+                        </div>
+                        <div class="input-wrapper">
+                            <i class="fas fa-tag input-icon"></i>
+                            <select id="categorySelect"></select>
+                            <button id="toggleCategoryDropdown" class="category-dropdown-btn" type="button" title="Manage Categories">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                        <div class="input-wrapper">
+                            <i class="fas fa-calendar input-icon"></i>
+                            <input type="date" id="dueDate">
+                        </div>
+                        <button id="addTaskBtn" class="add-btn">
+                            <i class="fas fa-plus"></i> Add Task
+                        </button>
+                    </div>
+                </div>
+
+                <div class="board">
+                    <div class="column" id="notStarted">
+                        <div class="column-header">
+                            <div class="column-title">
+                                <i class="fas fa-clock"></i>
+                                <h3>Not Yet Started</h3>
+                            </div>
+                            <span class="task-count">0</span>
+                        </div>
+                        <div class="task-list" data-status="not-started"></div>
+                    </div>
+
+                    <div class="column" id="inProgress">
+                        <div class="column-header">
+                            <div class="column-title">
+                                <i class="fas fa-spinner"></i>
+                                <h3>In Progress</h3>
+                            </div>
+                            <span class="task-count">0</span>
+                        </div>
+                        <div class="task-list" data-status="in-progress"></div>
+                    </div>
+
+                    <div class="column" id="completed">
+                        <div class="column-header">
+                            <div class="column-title">
+                                <i class="fas fa-check-circle"></i>
+                                <h3>Completed</h3>
+                            </div>
+                            <span class="task-count">0</span>
+                        </div>
+                        <div class="task-list" data-status="completed"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-column">
+                <div class="quick-checklist-box">
+                    <h2>Task</h2>
+                    <div class="quick-checklist-input-row">
+                        <input type="text" id="quickChecklistInput" placeholder="Add quick task...">
+                        <button id="addQuickChecklistBtn" class="btn-primary">Add</button>
+                    </div>
+                    <ul id="quickChecklist"></ul>
+                </div>
+            </div>
+        </div>
+        <div class="calendar-section large">
+            <div class="calendar-header">
+                <button id="prevMonth" class="calendar-btn"><i class="fas fa-chevron-left"></i></button>
+                <span id="currentMonth"></span>
+                <button id="nextMonth" class="calendar-btn"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="calendar large">
+                <div class="calendar-weekdays">
+                    <div>Sun</div>
+                    <div>Mon</div>
+                    <div>Tue</div>
+                    <div>Wed</div>
+                    <div>Thu</div>
+                    <div>Fri</div>
+                    <div>Sat</div>
+                </div>
+                <div id="calendarDays" class="calendar-days large"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Task Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-edit"></i> Edit Task</h2>
+                <button class="close-btn" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="editTaskTitle">Task Title</label>
+                    <input type="text" id="editTaskTitle" placeholder="Enter task title">
+                </div>
+                <div class="form-group">
+                    <label for="editTaskCategory">Category</label>
+                    <select id="editTaskCategory"></select>
+                </div>
+                <div class="form-group">
+                    <label for="editTaskDueDate">Due Date</label>
+                    <input type="date" id="editTaskDueDate">
+                </div>
+                <div class="form-group">
+                    <label for="editTaskStatus">Status</label>
+                    <select id="editTaskStatus">
+                        <option value="not-started">Not Yet Started</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelEdit">Cancel</button>
+                <button class="btn-primary" id="saveEdit">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
