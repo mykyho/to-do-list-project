@@ -38,9 +38,12 @@ class TodoApp {
         this.addQuickChecklistBtn = document.getElementById('addQuickChecklistBtn');
         this.quickChecklistList = document.getElementById('quickChecklist');
         
-        // Set default due date to today
-        const today = new Date().toISOString().split('T')[0];
-        this.dueDateInput.value = today;
+        // Set default due date to today using local timezone
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        this.dueDateInput.value = `${year}-${month}-${day}`;
     }
 
     setupEventListeners() {
@@ -236,8 +239,17 @@ class TodoApp {
         taskDiv.draggable = true;
         taskDiv.dataset.taskId = task.id;
 
-        const dueDate = task.dueDate ? new Date(task.dueDate) : null;
-        const isOverdue = dueDate && dueDate < new Date() && task.status !== 'completed';
+        // Parse date in local timezone to avoid UTC issues
+        let dueDate = null;
+        let isOverdue = false;
+        if (task.dueDate) {
+            // Parse YYYY-MM-DD format in local timezone
+            const [year, month, day] = task.dueDate.split('-').map(Number);
+            dueDate = new Date(year, month - 1, day); // month is 0-indexed
+            const today = new Date();
+            const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            isOverdue = dueDate < todayStart && task.status !== 'completed';
+        }
 
         // Find the category object for this task
         const catObj = this.categories.find(cat => cat.name === task.category);
@@ -409,7 +421,12 @@ class TodoApp {
 
             const dayElement = document.createElement('div');
             dayElement.className = 'calendar-day';
-            dayElement.textContent = date.getDate();
+            
+            // Create the day number element
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'day-number';
+            dayNumber.textContent = date.getDate();
+            dayElement.appendChild(dayNumber);
 
             // Check if it's today
             const today = new Date();
@@ -425,13 +442,48 @@ class TodoApp {
             // Check if there are tasks on this date
             const tasksOnDate = this.tasks.filter(task => {
                 if (!task.dueDate) return false;
-                const taskDate = new Date(task.dueDate);
+                // Parse date in local timezone to avoid UTC issues
+                const [year, month, day] = task.dueDate.split('-').map(Number);
+                const taskDate = new Date(year, month - 1, day);
                 return taskDate.toDateString() === date.toDateString();
             });
 
             if (tasksOnDate.length > 0) {
                 dayElement.classList.add('has-tasks');
                 dayElement.title = `${tasksOnDate.length} task(s) on this date`;
+                
+                // Create tasks container
+                const tasksContainer = document.createElement('div');
+                tasksContainer.className = 'calendar-tasks';
+                
+                // Show up to 3 tasks (to avoid overcrowding)
+                const tasksToShow = tasksOnDate.slice(0, 3);
+                
+                tasksToShow.forEach(task => {
+                    const taskElement = document.createElement('div');
+                    taskElement.className = 'calendar-task-item';
+                    
+                    // Find category color
+                    const category = this.categories.find(cat => cat.name === task.category);
+                    const categoryColor = category ? category.color : '#D9AAB7';
+                    
+                    taskElement.innerHTML = `
+                        <span class="calendar-task-dot" style="background-color: ${categoryColor}"></span>
+                        <span class="calendar-task-title">${task.title}</span>
+                    `;
+                    
+                    tasksContainer.appendChild(taskElement);
+                });
+                
+                // If there are more than 3 tasks, show a count
+                if (tasksOnDate.length > 3) {
+                    const moreTasks = document.createElement('div');
+                    moreTasks.className = 'calendar-more-tasks';
+                    moreTasks.textContent = `+${tasksOnDate.length - 3} more`;
+                    tasksContainer.appendChild(moreTasks);
+                }
+                
+                dayElement.appendChild(tasksContainer);
             }
 
             this.calendarDays.appendChild(dayElement);
@@ -469,7 +521,9 @@ class TodoApp {
     }
 
     formatDate(dateString) {
-        const date = new Date(dateString);
+        // Parse YYYY-MM-DD format in local timezone
+        const [year, month, day] = dateString.split('-').map(Number);
+        const date = new Date(year, month - 1, day); // month is 0-indexed
         return date.toLocaleDateString('en-US', { 
             month: 'short', 
             day: 'numeric',
@@ -640,28 +694,36 @@ document.addEventListener('DOMContentLoaded', () => {
 // Add some sample tasks for demonstration
 window.addEventListener('load', () => {
     if (todoApp.tasks.length === 0) {
+        // Helper function to format date in local timezone
+        const formatLocalDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
         const sampleTasks = [
             {
                 id: Date.now() - 3,
                 title: 'Complete project presentation',
-                category: 'work',
-                dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                category: 'Work',
+                dueDate: formatLocalDate(new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)),
                 status: 'in-progress',
                 createdAt: new Date().toISOString()
             },
             {
                 id: Date.now() - 2,
                 title: 'Study for math exam',
-                category: 'school',
-                dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                category: 'School',
+                dueDate: formatLocalDate(new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)),
                 status: 'not-started',
                 createdAt: new Date().toISOString()
             },
             {
                 id: Date.now() - 1,
                 title: 'Buy groceries',
-                category: 'personal',
-                dueDate: new Date().toISOString().split('T')[0],
+                category: 'Personal',
+                dueDate: formatLocalDate(new Date()),
                 status: 'completed',
                 createdAt: new Date().toISOString()
             }
